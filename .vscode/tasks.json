@@ -1,0 +1,46 @@
+{
+    "version":"2.0.0",
+    "command": "./node_modules/.bin/gulp",
+    "tasks":[
+        {
+            "type": "shell",
+            "label": "Build Debug",
+            "dependsOn" : "CMake Debug",
+            "options": {
+                "cwd": "${workspaceRoot}/build"
+            },
+            "command": "make",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "CMake Debug",
+            "options": {
+                "cwd": "${workspaceRoot}/build"
+            },
+            "command": "cmake -DCMAKE_BUILD_TYPE=Debug ../",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "CMake Clean",
+            "options": {
+                "cwd": "${workspaceRoot}/build"
+            },
+            "command": "rm -rf *",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}
