@@ -10,6 +10,8 @@
 
 #include "c_secrecy.h"
 
+#define MIN(i, j) (((i) < (j)) ? (i) : (j))
+
 void handleErrors()
 {
     ERR_print_errors_fp(stderr);
@@ -69,6 +71,15 @@ void expose_secret(Secret_t *secret, uint8_t *plaintext)
     EVP_CIPHER_CTX_free(ctx);
 }
 
+void generate_keys(uint8_t *key, uint8_t *iv)
+{
+    int rc = 0;
+
+    // needs error handling
+    rc = RAND_bytes(key, SECRET_KEY_SIZE);
+    rc = RAND_bytes(iv, SECRET_IV_SIZE);
+}
+
 // Generates a key and stores the value
 // data is the pointer to the start of the data
 // size is the size in bytes of the data e.g. a uint32 would be 4
@@ -76,24 +87,18 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
 {
     EVP_CIPHER_CTX *ctx;
 
-    int len, ciphertext_len;
-
-    uint8_t ciphertext[SECRET_BUFFER_SIZE_MAX];
+    int len, ciphertext_len, ciphertext_len_min;
+    uint8_t *ciphertext;
 
     int rc = 0;
     uint8_t key[SECRET_KEY_SIZE];
     uint8_t iv[SECRET_IV_SIZE];
 
-    if (size > SECRET_BUFFER_SIZE_MAX)
-    {
-        // set error string
-        errno = EINVAL;
-        return NULL;
-    }
+    // calculate the minimum length possible for the ciphertext
+    ciphertext_len_min = MIN(size * 2, SECRET_KEY_SIZE * 2);
 
     // generate keys
-    rc = RAND_bytes(key, SECRET_KEY_SIZE);
-    rc = RAND_bytes(iv, SECRET_IV_SIZE);
+    generate_keys(key, iv);
 
     /* Create and initialise the context */
     if(!(ctx = EVP_CIPHER_CTX_new()))
@@ -119,9 +124,17 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
      * Provide the message to be encrypted, and obtain the encrypted output.
      * EVP_EncryptUpdate can be called multiple times if necessary
      */
+    ciphertext = (uint8_t *)malloc(sizeof(uint8_t)*ciphertext_len_min);
+    if (ciphertext == NULL)
+    {
+        // errno
+        return NULL;
+    }
+
     if(1 != EVP_EncryptUpdate(ctx, ciphertext, &len, data, size))
     {
         // set errno / error string
+        free(ciphertext);
         EVP_CIPHER_CTX_free(ctx);
         return NULL;
     }
@@ -134,18 +147,11 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
     if(1 != EVP_EncryptFinal_ex(ctx, ciphertext + len, &len))
     {
         // set errno / error string
+        free(ciphertext);
         EVP_CIPHER_CTX_free(ctx);
         return NULL;
     }
     ciphertext_len += len;
-
-    if (ciphertext_len > SECRET_BUFFER_SIZE_MAX)
-    {
-        EVP_CIPHER_CTX_free(ctx);
-        // set error string
-        errno = EINVAL;
-        return NULL;
-    }
 
     /* Clean up */
     EVP_CIPHER_CTX_free(ctx);
@@ -155,15 +161,29 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
     if (secret == NULL)
     {
         // set errno
+        free(ciphertext);
         return NULL;
     }
 
-    memset(secret->value, 0, SECRET_BUFFER_SIZE_MAX * sizeof(uint8_t));
+    // double the size so that we know we have enough for the ciphertext
+    secret->value = (uint8_t *)malloc(sizeof(uint8_t)*size*2);
+
+    if (secret->value == NULL)
+    {
+        // set errno
+        free(ciphertext);
+        return NULL;
+    }
+
+    // clear out the memory location
+    memset(secret->value, 0, sizeof(uint8_t)*size*2);
 
     secret->size = size;
     secret->ciphertext_len = ciphertext_len;
     
     memcpy(secret->value, ciphertext, ciphertext_len * sizeof(uint8_t));
+    free(ciphertext);
+    
     memcpy(secret->key, key, SECRET_KEY_SIZE * sizeof(uint8_t));
     memcpy(secret->iv, iv, SECRET_IV_SIZE * sizeof(uint8_t));
 
@@ -173,7 +193,7 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
 void __attribute__((optimize("O0"))) clear_secret(Secret_t *secret)
 {
     // comments that this could be compiled out, memset_s solves this but was introduced in C11
-    memset(secret->value, 0, SECRET_BUFFER_SIZE_MAX * sizeof(uint8_t));
+    memset(secret->value, 0, sizeof(uint8_t)* secret->size*2);
     memset(secret->key, 0, SECRET_KEY_SIZE * sizeof(uint8_t));
     memset(secret->iv, 0, SECRET_IV_SIZE * sizeof(uint8_t));
     secret->size = 0;

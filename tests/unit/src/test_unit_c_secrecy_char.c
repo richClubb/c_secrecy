@@ -9,7 +9,7 @@ void test_basic_char(void)
 {
     char data = 't';
     char *ptr;
-    uint8_t buffer[SECRET_BUFFER_SIZE_MAX];
+    uint8_t buffer[sizeof(uint8_t)*1];
     uint32_t size;
     
     Secret_t *secret = create_secret(&data, sizeof(char));
@@ -29,8 +29,8 @@ void test_basic_char_array(void)
 {
     char *data = "test";
     
-    uint8_t buffer[SECRET_BUFFER_SIZE_MAX];
-    uint8_t comp_buffer[SECRET_BUFFER_SIZE_MAX];
+    uint8_t buffer[sizeof(uint8_t)*4];
+    uint8_t comp_buffer[sizeof(uint8_t)*4];
     uint32_t size;
     
     Secret_t *secret = create_secret(data, sizeof(char)*4);

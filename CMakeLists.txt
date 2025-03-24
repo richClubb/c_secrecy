@@ -9,6 +9,8 @@ project(
     LANGUAGES C
 )
 
+include(CTest)
+
 set(
     C_STANDARD 
     C11

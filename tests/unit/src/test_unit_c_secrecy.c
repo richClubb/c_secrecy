@@ -9,6 +9,7 @@ void main(void)
 
     run_char_suite();
     run_float_suite();
+    run_error_suite();
     
     CU_cleanup_registry();
 }

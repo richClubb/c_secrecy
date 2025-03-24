@@ -9,8 +9,8 @@ void test_basic_float(void)
 {
     float data = 10;
     float buffer;
-    uint8_t buffer_2[SECRET_BUFFER_SIZE_MAX];
-    uint8_t buffer_3[SECRET_BUFFER_SIZE_MAX];
+    uint8_t buffer_2[sizeof(float)];
+    uint8_t buffer_3[sizeof(float)];
     uint32_t size;
     
     Secret_t *secret = create_secret((uint8_t *)&data, sizeof(float));

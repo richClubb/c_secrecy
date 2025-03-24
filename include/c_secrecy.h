@@ -12,15 +12,12 @@
 
 // internal includes
 
-
-#define SECRET_BUFFER_SIZE_MAX 128
-
 // these could be configurable?
 #define SECRET_KEY_SIZE 32
 #define SECRET_IV_SIZE 16
 
 typedef struct {
-    char value[SECRET_BUFFER_SIZE_MAX];
+    char *value;
     uint8_t key[SECRET_KEY_SIZE];
     uint8_t iv[SECRET_IV_SIZE];
     uint64_t size;
