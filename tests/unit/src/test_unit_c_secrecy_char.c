@@ -13,6 +13,7 @@ void test_basic_char(void)
     uint32_t size;
     
     Secret_t *secret = create_secret(&data, sizeof(char));
+    CU_ASSERT_NOT_EQUAL_FATAL(secret, NULL); // bomb out if this is bad as we can't continue
 
     CU_ASSERT_NOT_EQUAL((char)*secret->value, 't');
 
@@ -34,6 +35,7 @@ void test_basic_char_array(void)
     uint32_t size;
     
     Secret_t *secret = create_secret(data, sizeof(char)*4);
+    CU_ASSERT_NOT_EQUAL_FATAL(secret, NULL); // bomb out if this is bad as we can't continue
 
     CU_ASSERT_NOT_EQUAL(strncmp("test", secret->value, 4), 0);
 

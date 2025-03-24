@@ -10,6 +10,8 @@ void main(void)
     run_char_suite();
     run_float_suite();
     run_error_suite();
+    run_int_suite();
+    run_custom_struct_suite();
     
     CU_cleanup_registry();
 }

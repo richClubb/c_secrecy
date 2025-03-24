@@ -23,6 +23,9 @@ add_executable(
     "${PROJECT_SOURCE_DIR}/src/test_unit_c_secrecy.c"
     "${PROJECT_SOURCE_DIR}/src/test_unit_c_secrecy_char.c"
     "${PROJECT_SOURCE_DIR}/src/test_unit_c_secrecy_float.c"
+    "${PROJECT_SOURCE_DIR}/src/test_unit_c_secrecy_error.c"
+    "${PROJECT_SOURCE_DIR}/src/test_unit_c_secrecy_int.c"
+    "${PROJECT_SOURCE_DIR}/src/test_unit_c_secrecy_custom_struct.c"
 )
 
 add_test(NAME "${PROJECT_NAME}" COMMAND "${PROJECT_NAME}")

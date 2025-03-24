@@ -13,12 +13,9 @@ void test_error_array_size(void)
     uint32_t size;
     
     Secret_t *secret = create_secret(&data, sizeof(char));
+    CU_ASSERT_NOT_EQUAL_FATAL(secret, NULL);
 
-    CU_ASSERT_NOT_EQUAL((char)*secret->value, 't');
-
-    expose_secret(secret, buffer);
-
-    CU_ASSERT_EQUAL((char)*buffer, 't');
+    // how do I mock the interfaces?
 
     delete_secret(secret);
 

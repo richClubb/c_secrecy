@@ -12,13 +12,9 @@
 
 #define MIN(i, j) (((i) < (j)) ? (i) : (j))
 
-void handleErrors()
-{
-    ERR_print_errors_fp(stderr);
-    printf("errors\n");
-}
-
-// Uses the key to decrypt the value
+/*
+    Uses the key to decrypt the value
+*/
 void expose_secret(Secret_t *secret, uint8_t *plaintext)
 {
     EVP_CIPHER_CTX *ctx;
@@ -30,6 +26,7 @@ void expose_secret(Secret_t *secret, uint8_t *plaintext)
     /* Create and initialise the context */
     if(!(ctx = EVP_CIPHER_CTX_new()))
     {
+        // errno
         return;
     }
     /*
@@ -41,6 +38,7 @@ void expose_secret(Secret_t *secret, uint8_t *plaintext)
      */
     if(1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, secret->key, secret->iv))
     {
+        // errno
         EVP_CIPHER_CTX_free(ctx);
         return;
     }
@@ -51,6 +49,7 @@ void expose_secret(Secret_t *secret, uint8_t *plaintext)
      */
     if(1 != EVP_DecryptUpdate(ctx, plaintext, &len, secret->value, secret->ciphertext_len))
     {
+        // errno
         EVP_CIPHER_CTX_free(ctx);
         return;
     }  
@@ -62,6 +61,7 @@ void expose_secret(Secret_t *secret, uint8_t *plaintext)
      */
     if(1 != EVP_DecryptFinal_ex(ctx, plaintext + len, &len))
     {
+        // errno
         EVP_CIPHER_CTX_free(ctx);
         return;
     }
@@ -71,18 +71,38 @@ void expose_secret(Secret_t *secret, uint8_t *plaintext)
     EVP_CIPHER_CTX_free(ctx);
 }
 
-void generate_keys(uint8_t *key, uint8_t *iv)
+/*
+    Generates the key and iv for the secret encryption
+*/
+int generate_keys(uint8_t *key, uint8_t *iv)
 {
     int rc = 0;
 
     // needs error handling
     rc = RAND_bytes(key, SECRET_KEY_SIZE);
+    if (rc != 1)
+    {
+        return ERR_RAND_CREATE_KEY;
+    }
+
     rc = RAND_bytes(iv, SECRET_IV_SIZE);
+    if (rc != 1)
+    {
+        return ERR_RAND_CREATE_IV;
+    }
+
+    return SUCCESS;
 }
 
-// Generates a key and stores the value
-// data is the pointer to the start of the data
-// size is the size in bytes of the data e.g. a uint32 would be 4
+/*
+    Generates a key and stores the value
+    data is the pointer to the start of the data
+    size is the size in bytes of the data e.g. a uint32 would be 4
+
+    Note: Once this is called, the value for the data should be deleted or cleared immediately as it is
+    an unsecure store of data. memset and free where necessary
+*/
+
 Secret_t *create_secret(uint8_t *data, uint64_t size)
 {
     EVP_CIPHER_CTX *ctx;
@@ -98,7 +118,12 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
     ciphertext_len_min = MIN(size * 2, SECRET_KEY_SIZE * 2);
 
     // generate keys
-    generate_keys(key, iv);
+    rc = generate_keys(key, iv);
+    if (rc != SUCCESS)
+    {
+        // set errno
+        return NULL;
+    }
 
     /* Create and initialise the context */
     if(!(ctx = EVP_CIPHER_CTX_new()))
@@ -128,6 +153,7 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
     if (ciphertext == NULL)
     {
         // errno
+        EVP_CIPHER_CTX_free(ctx);
         return NULL;
     }
 
@@ -153,10 +179,12 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
     }
     ciphertext_len += len;
 
-    /* Clean up */
+    // finished with the cipeher context here, clean up
     EVP_CIPHER_CTX_free(ctx);
 
+    // create and allocate the secret 
     Secret_t *secret;
+
     secret = (Secret_t *)malloc(sizeof(Secret_t));
     if (secret == NULL)
     {
@@ -166,22 +194,24 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
     }
 
     // double the size so that we know we have enough for the ciphertext
-    secret->value = (uint8_t *)malloc(sizeof(uint8_t)*size*2);
-
+    secret->value = (uint8_t *)malloc(sizeof(uint8_t) * ciphertext_len);
     if (secret->value == NULL)
     {
         // set errno
         free(ciphertext);
+        free(secret);
         return NULL;
     }
 
     // clear out the memory location
-    memset(secret->value, 0, sizeof(uint8_t)*size*2);
+    memset(secret->value, 0, sizeof(uint8_t) * ciphertext_len);
 
     secret->size = size;
     secret->ciphertext_len = ciphertext_len;
     
     memcpy(secret->value, ciphertext, ciphertext_len * sizeof(uint8_t));
+
+    // no longer need the ciphertext here, clear it out
     free(ciphertext);
     
     memcpy(secret->key, key, SECRET_KEY_SIZE * sizeof(uint8_t));
@@ -190,10 +220,13 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
     return secret;
 }
 
+/*
+    Clears out all the secret memory locations
+*/
 void __attribute__((optimize("O0"))) clear_secret(Secret_t *secret)
 {
     // comments that this could be compiled out, memset_s solves this but was introduced in C11
-    memset(secret->value, 0, sizeof(uint8_t)* secret->size*2);
+    memset(secret->value, 0, sizeof(uint8_t) * secret->ciphertext_len);
     memset(secret->key, 0, SECRET_KEY_SIZE * sizeof(uint8_t));
     memset(secret->iv, 0, SECRET_IV_SIZE * sizeof(uint8_t));
     secret->size = 0;
@@ -203,6 +236,9 @@ void __attribute__((optimize("O0"))) clear_secret(Secret_t *secret)
 void delete_secret(Secret_t *secret)
 {
     clear_secret(secret);
+
+    // clear out the secret value
+    free(secret->value);
 
     // check success
     free(secret);

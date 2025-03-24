@@ -16,6 +16,10 @@
 #define SECRET_KEY_SIZE 32
 #define SECRET_IV_SIZE 16
 
+#define ERR_RAND_CREATE_KEY 1
+#define ERR_RAND_CREATE_IV 2
+#define SUCCESS 0
+
 typedef struct {
     char *value;
     uint8_t key[SECRET_KEY_SIZE];

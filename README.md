@@ -25,3 +25,4 @@ As C does not have the ability to hide member variables we encrypt the data when
 
 * Is there a better way to store the keys so that we can use this like a better encrypted storage container.
 * Is there a better way to expose they keys?
+* ways to do this with debugging allowing values?
