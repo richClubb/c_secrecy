@@ -13,7 +13,7 @@ include(CTest)
 
 set(
     C_STANDARD 
-    C11
+    C99
 )
 
 add_subdirectory("${PROJECT_SOURCE_DIR}/tests/unit")

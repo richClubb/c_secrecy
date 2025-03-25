@@ -30,6 +30,7 @@ typedef struct {
 
 // Uses the key to decrypt the value
 void expose_secret(Secret_t *, uint8_t *);
+uint8_t *expose_secret_inline(Secret_t *);
 
 // Generates a key and stores the value
 Secret_t *create_secret(uint8_t *, uint64_t);

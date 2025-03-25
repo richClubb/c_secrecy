@@ -11,7 +11,7 @@ include(CTest)
 
 set(
     C_STANDARD 
-    C11
+    C99
 )
 
 #################

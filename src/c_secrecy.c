@@ -79,6 +79,17 @@ void expose_secret(Secret_t *secret, uint8_t *plaintext)
     EVP_CIPHER_CTX_free(ctx);
 }
 
+uint8_t *expose_secret_inline(Secret_t *secret)
+{
+    uint8_t *plaintext;
+
+    plaintext = (uint8_t *)malloc(secret->size);
+
+    expose_secret(secret, plaintext);
+
+    return plaintext;
+}
+
 /*
     Generates the key and iv for the secret encryption
 */

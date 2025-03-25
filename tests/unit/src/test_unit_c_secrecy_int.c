@@ -43,12 +43,32 @@ void test_basic_int_array(void)
     delete_secret(secret);
 }
 
+void test_basic_int_inline(void)
+{
+    int data = 450;
+    int *buffer;
+    
+    Secret_t *secret = create_secret((uint8_t *)&data, sizeof(int));
+    CU_ASSERT_NOT_EQUAL_FATAL(secret, NULL); // bomb out if this is bad as we can't continue
+
+    CU_ASSERT_NOT_EQUAL((int)*secret->value, 450);
+
+    buffer = (int *)expose_secret_inline(secret);
+
+    CU_ASSERT_EQUAL(*buffer, 450);
+    free(buffer);
+
+    delete_secret(secret);
+    // can't check the memory location or we get a segfault. Gonna have to trust us bro.
+}
+
 void run_int_suite(void)
 {
     
     CU_pSuite suite = CU_add_suite("C secrecy int tests", 0, 0);
     CU_add_test(suite, "test of basic int creation and destruction", test_basic_int);
     CU_add_test(suite, "test of basic int array creation and destruction", test_basic_int_array);
+    CU_add_test(suite, "test of basic int creation and destruction 2", test_basic_int_inline);
 
     CU_basic_run_tests();
 }
