@@ -12,6 +12,8 @@ This gives the ability to audit the secrets a bit easier as you can always see w
 
 As C does not have the ability to hide member variables we encrypt the data when it's stored so that it is 'harder' to access, and the use of expose_value allows us to extract the data to get a better audit of the values stored in the secrets.
 
+The encryption is not designed to be "secure" but more just help to obfuscate the value. In some ways it does provide a measure of security as if a secret does leak then the value should be sufficiently well encrypted that it would be impossible for a user to use it.
+
 ## Building
 
 ```
@@ -45,3 +47,5 @@ There should be a working debug target for the unit tests.
 * Is there a better way to store the keys so that we can use this like a better encrypted storage container.
 * Is there a better way to expose they keys?
 * ways to do this with debugging allowing values?
+
+* investigate if there is a way to make the encryption more secure. I'm not sure if there is a nice way to do key management.
