@@ -16,6 +16,8 @@ set(
     C11
 )
 
+add_subdirectory("${PROJECT_SOURCE_DIR}/tests/unit")
+
 #################
 ## Main Library
 #################
@@ -45,5 +47,3 @@ target_link_libraries(
     PUBLIC
     "crypto"
 )
-
-add_subdirectory("${PROJECT_SOURCE_DIR}/tests/unit")
