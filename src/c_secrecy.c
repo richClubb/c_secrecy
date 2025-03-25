@@ -1,4 +1,3 @@
-#include <errno.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -9,6 +8,7 @@
 #include <openssl/rand.h>
 
 #include "c_secrecy.h"
+#include "c_secrecy_error.h"
 
 #define MIN(i, j) (((i) < (j)) ? (i) : (j))
 
@@ -61,7 +61,7 @@ void expose_secret(Secret_t *secret, uint8_t *plaintext)
      */
     if(1 != EVP_DecryptFinal_ex(ctx, plaintext + len, &len))
     {
-        // errno
+        
         EVP_CIPHER_CTX_free(ctx);
         return;
     }
@@ -121,14 +121,14 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
     rc = generate_keys(key, iv);
     if (rc != SUCCESS)
     {
-        // set errno
+        c_secrecy_errno = E_GEN_KEY_ERROR;
         return NULL;
     }
 
     /* Create and initialise the context */
     if(!(ctx = EVP_CIPHER_CTX_new()))
     {
-        // set errno / error string
+        c_secrecy_errno = E_CREATE_CIPHER_CTX;
         return NULL;
     }
     /*
