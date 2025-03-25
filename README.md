@@ -12,6 +12,23 @@ This gives the ability to audit the secrets a bit easier as you can always see w
 
 As C does not have the ability to hide member variables we encrypt the data when it's stored so that it is 'harder' to access, and the use of expose_value allows us to extract the data to get a better audit of the values stored in the secrets.
 
+## Building
+
+```
+mkdir build
+cd build
+cmake ../
+make
+```
+
+This should generate the library (`lib/libc_secrecy.so`) and also generate the test `build/tests/unit/c_secrecy_unit_tests`.
+
+Currently only compiles for x86 on linux.
+
+## Debugging
+
+There should be a working debug target for the unit tests.
+
 ## To-Do
 
 * CI/CD pipeline
@@ -21,6 +38,8 @@ As C does not have the ability to hide member variables we encrypt the data when
 * Investigate virtual classes for extensibility
 * Cross compile for different arch / OS
   * Currently only tested in Linux but I want this to be used in windows
+  * aarch64
+  * embedded
 * Set up release process
 
 * Is there a better way to store the keys so that we can use this like a better encrypted storage container.
