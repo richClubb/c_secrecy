@@ -2,23 +2,19 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-// test mock openssl
-#ifdef DEBUG
-#include <test_mock_openssl.h>
-
-#else
-
 #include <openssl/evp.h>
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
 
-#endif
-
 #include "c_secrecy.h"
 #include "c_secrecy_error.h"
 
+#include <pthread.h>
+
 #define MIN(i, j) (((i) < (j)) ? (i) : (j))
+
+__thread int c_secrecy_errno;
 
 /*
     Uses the key to decrypt the value
@@ -140,14 +136,14 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
     rc = generate_keys(key, iv);
     if (rc != SUCCESS)
     {
-        //c_secrecy_errno = E_GEN_KEY_ERROR;
+        c_secrecy_errno = ERR_GEN_KEY_ERROR;
         return NULL;
     }
 
     /* Create and initialise the context */
     if(!(ctx = EVP_CIPHER_CTX_new()))
     {
-        //c_secrecy_errno = E_CREATE_CIPHER_CTX;
+        c_secrecy_errno = ERR_CREATE_CIPHER_CTX;
         return NULL;
     }
     /*

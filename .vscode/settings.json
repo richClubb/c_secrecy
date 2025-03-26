@@ -5,6 +5,7 @@
         "array": "c",
         "string_view": "c",
         "initializer_list": "c",
-        "evp.h": "c"
+        "evp.h": "c",
+        "stdlib.h": "c",
     }
 }

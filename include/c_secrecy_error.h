@@ -2,12 +2,15 @@
 
 #define __C_SECRECY_ERROR__
 
-extern int c_secrecy_errno;
+#include <pthread.h>
 
-extern char *c_secrecy_errstr;
+extern __thread int c_secrecy_errno;
 
-#define E_CREATE_CIPHER_CTX 1
-#define E_GEN_KEY_ERROR 2
+extern __thread char *c_secrecy_errstr;
 
+#define ERR_CREATE_CIPHER_CTX 1
+#define ERR_GEN_KEY_ERROR 2
+#define ERR_RAND_CREATE_KEY 3
+#define ERR_RAND_CREATE_IV 4
 
 #endif

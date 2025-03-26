@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "c_secrecy.h"
+#include "c_secrecy_error.h"
 
 void test_basic_char(void)
 {
