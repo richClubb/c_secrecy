@@ -22,13 +22,13 @@ typedef struct {
     char *value;
     uint8_t key[SECRET_KEY_SIZE];
     uint8_t iv[SECRET_IV_SIZE];
-    uint64_t size;
+    uint64_t value_len;
     uint64_t ciphertext_len;
 } Secret_t;
 
 // Uses the key to decrypt the value
-void expose_secret(Secret_t *, uint8_t *);
-uint8_t *expose_secret_inline(Secret_t *);
+void expose_secret(Secret_t *, uint8_t *, const int);
+const uint8_t *expose_secret_inline(Secret_t *);
 
 // Generates a key and stores the value
 Secret_t *create_secret(uint8_t *, uint64_t);

@@ -35,7 +35,7 @@ void test_basic_custom_struct(void)
     CU_ASSERT_NOT_EQUAL(strncmp("rich", ptr.name, 4), 0);
     CU_ASSERT_NOT_EQUAL(ptr.id, 1);
 
-    expose_secret(secret, (uint8_t *)&buffer);
+    expose_secret(secret, (uint8_t *)&buffer, sizeof(struct userdata));
 
     CU_ASSERT_EQUAL(strncmp("rich", buffer.name, 4), 0);
     CU_ASSERT_EQUAL(buffer.id, 1);
@@ -70,7 +70,7 @@ void test_basic_custom_struct_array(void)
     CU_ASSERT_NOT_EQUAL(strncmp("Phil", ptr[2].name, 4), 0);
     CU_ASSERT_NOT_EQUAL(ptr[2].id, 3);
 
-    expose_secret(secret, (uint8_t *)buffer);
+    expose_secret(secret, (uint8_t *)buffer, sizeof(struct userdata)*3);
 
     CU_ASSERT_EQUAL(strncmp("rich", buffer[0].name, 4), 0);
     CU_ASSERT_EQUAL(buffer[0].id, 1);
@@ -113,14 +113,14 @@ void test_basic_TLV_dynamic_sized(void)
 
     secret = create_secret(data, sizeof(struct tlv) + sizeof(char) * 4);
 
-    ptr = &secret->value;
+    ptr = (struct tlv*)&secret->value;
 
     CU_ASSERT_NOT_EQUAL(ptr->type, String);
     CU_ASSERT_NOT_EQUAL(ptr->length, 4);
     CU_ASSERT_NOT_EQUAL(strncmp(&ptr->value, "rich", 4), 0);
 
-    buffer = (uint8_t *)malloc(secret->size);
-    expose_secret(secret, buffer);
+    buffer = (uint8_t *)malloc(secret->value_len);
+    expose_secret(secret, buffer, secret->value_len);
  
     ptr = (struct tlv*)buffer;
 

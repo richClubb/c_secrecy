@@ -18,7 +18,7 @@ void test_basic_char(void)
 
     CU_ASSERT_NOT_EQUAL((char)*secret->value, 't');
 
-    expose_secret(secret, buffer);
+    expose_secret(secret, buffer, 1);
 
     CU_ASSERT_EQUAL((char)*buffer, 't');
 
@@ -40,7 +40,7 @@ void test_basic_char_array(void)
 
     CU_ASSERT_NOT_EQUAL(strncmp("test", secret->value, 4), 0);
 
-    expose_secret(secret, buffer);
+    expose_secret(secret, buffer, 4);
 
     CU_ASSERT_EQUAL(strncmp("test", buffer, 4), 0);  
 

@@ -22,6 +22,25 @@ void test_error_array_size(void)
     // can't check the memory location or we get a segfault. Gonna have to trust us bro.
 }
 
+void test_delete_null_secret(void)
+{
+    Secret_t *secret;
+
+    // test precondition
+    CU_ASSERT_EQUAL_FATAL(secret, NULL);
+
+    // enough to test that we're protecting against accessing a secret that is null
+    delete_secret(secret);
+}
+
+void test_delete_null_secret_value(void)
+{
+    Secret_t secret;
+
+    // enough to test that we're protecting against a secret value that is null
+    delete_secret(&secret);
+}
+
 void run_error_suite(void)
 {
     

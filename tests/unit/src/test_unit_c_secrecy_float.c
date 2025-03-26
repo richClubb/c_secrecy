@@ -15,7 +15,7 @@ void test_basic_float(void)
 
     CU_ASSERT_NOT_EQUAL((float)*secret->value, 10.0);
 
-    expose_secret(secret, (uint8_t *)&buffer);
+    expose_secret(secret, (uint8_t *)&buffer, sizeof(float));
 
     CU_ASSERT_EQUAL((float)buffer, 10);
 
@@ -34,7 +34,7 @@ void test_basic_float_array(void)
 
     CU_ASSERT_NOT_EQUAL((float)*secret->value, 10.0);
 
-    expose_secret(secret, (uint8_t *)&buffer);
+    expose_secret(secret, (uint8_t *)&buffer, sizeof(float) * 3);
 
     CU_ASSERT_EQUAL(buffer[0], 10);
     CU_ASSERT_EQUAL(buffer[1], 11);

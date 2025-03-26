@@ -37,7 +37,6 @@ There should be a working debug target for the unit tests.
 * Properly arrange make files
 * Integration tests?
   * What might they be?
-* Investigate virtual classes for extensibility
 * Cross compile for different arch / OS
   * Currently only tested in Linux but I want this to be used in windows
   * aarch64
@@ -49,3 +48,10 @@ There should be a working debug target for the unit tests.
 * ways to do this with debugging allowing values?
 
 * investigate if there is a way to make the encryption more secure. I'm not sure if there is a nice way to do key management.
+
+## Example Program
+
+```
+
+
+```

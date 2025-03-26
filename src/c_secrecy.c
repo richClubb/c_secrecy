@@ -19,13 +19,19 @@ __thread int c_secrecy_errno;
 /*
     Uses the key to decrypt the value
 */
-void expose_secret(Secret_t *secret, uint8_t *plaintext)
+void expose_secret(Secret_t *secret, uint8_t *plaintext, const int plaintext_buffer_len)
 {
     EVP_CIPHER_CTX *ctx;
 
     int len;
 
     int plaintext_len;
+
+    if (secret->value_len > plaintext_buffer_len)
+    {
+        // errno
+        return;
+    }
 
     /* Create and initialise the context */
     if(!(ctx = EVP_CIPHER_CTX_new()))
@@ -75,13 +81,13 @@ void expose_secret(Secret_t *secret, uint8_t *plaintext)
     EVP_CIPHER_CTX_free(ctx);
 }
 
-uint8_t *expose_secret_inline(Secret_t *secret)
+const uint8_t *expose_secret_inline(Secret_t *secret)
 {
     uint8_t *plaintext;
 
-    plaintext = (uint8_t *)malloc(secret->size);
+    plaintext = (uint8_t *)malloc(secret->value_len);
 
-    expose_secret(secret, plaintext);
+    expose_secret(secret, plaintext, secret->value_len);
 
     return plaintext;
 }
@@ -221,7 +227,7 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
     // clear out the memory location
     memset(secret->value, 0, sizeof(uint8_t) * ciphertext_len);
 
-    secret->size = size;
+    secret->value_len = size;
     secret->ciphertext_len = ciphertext_len;
     
     memcpy(secret->value, ciphertext, ciphertext_len * sizeof(uint8_t));
@@ -241,20 +247,40 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
 void __attribute__((optimize("O0"))) clear_secret(Secret_t *secret)
 {
     // comments that this could be compiled out, memset_s solves this but was introduced in C11
-    memset(secret->value, 0, sizeof(uint8_t) * secret->ciphertext_len);
+    if (secret == NULL)
+    {
+        return;
+    }
+
+    if (secret->value != NULL)
+    {
+        memset(secret->value, 0, sizeof(uint8_t) * secret->ciphertext_len);
+        
+        // this is currently not working but I'm not sure why
+        // memset_s(secret->value, 0, sizeof(uint8_t) * secret->ciphertext_len);
+    }
+
     memset(secret->key, 0, SECRET_KEY_SIZE * sizeof(uint8_t));
     memset(secret->iv, 0, SECRET_IV_SIZE * sizeof(uint8_t));
-    secret->size = 0;
+
+    // this is currently not working but I'm not sure why
+    // memset_s(secret->key, SECRET_KEY_SIZE * sizeof(uint8_t), 0, SECRET_KEY_SIZE * sizeof(uint8_t));
+    // memset_s(secret->iv, SECRET_IV_SIZE * sizeof(uint8_t), 0, SECRET_IV_SIZE * sizeof(uint8_t));
+
+    secret->value_len = 0;
     secret->ciphertext_len = 0;
 }
 
+/*
+    Only valid if you have a heap secret
+*/
 void delete_secret(Secret_t *secret)
 {
     clear_secret(secret);
 
     // clear out the secret value
     free(secret->value);
-
-    // check success
+    
+    // delete the secret
     free(secret);
 }
