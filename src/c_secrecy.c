@@ -26,17 +26,18 @@ void expose_secret(Secret_t *secret, uint8_t *plaintext, const int plaintext_buf
     int len;
 
     int plaintext_len;
+    c_secrecy_errno = 0;
 
     if (secret->value_len > plaintext_buffer_len)
     {
-        // errno
+        c_secrecy_errno = ERR_P_TEXT_LEN_ERROR;
         return;
     }
 
     /* Create and initialise the context */
     if(!(ctx = EVP_CIPHER_CTX_new()))
     {
-        // errno
+        c_secrecy_errno = ERR_CREATE_CIPHER_CTX;
         return;
     }
     /*
@@ -48,7 +49,7 @@ void expose_secret(Secret_t *secret, uint8_t *plaintext, const int plaintext_buf
      */
     if(1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, secret->key, secret->iv))
     {
-        // errno
+        c_secrecy_errno = ERR_DEC_INIT_ERROR;
         EVP_CIPHER_CTX_free(ctx);
         return;
     }
@@ -59,7 +60,7 @@ void expose_secret(Secret_t *secret, uint8_t *plaintext, const int plaintext_buf
      */
     if(1 != EVP_DecryptUpdate(ctx, plaintext, &len, secret->value, secret->ciphertext_len))
     {
-        // errno
+        c_secrecy_errno = ERR_DEC_UPDATE_ERROR;
         EVP_CIPHER_CTX_free(ctx);
         return;
     }  
@@ -71,7 +72,7 @@ void expose_secret(Secret_t *secret, uint8_t *plaintext, const int plaintext_buf
      */
     if(1 != EVP_DecryptFinal_ex(ctx, plaintext + len, &len))
     {
-        
+        c_secrecy_errno = ERR_DEC_FINAL_ERROR;
         EVP_CIPHER_CTX_free(ctx);
         return;
     }
@@ -85,7 +86,14 @@ const uint8_t *expose_secret_inline(Secret_t *secret)
 {
     uint8_t *plaintext;
 
+    c_secrecy_errno = 0;
+
     plaintext = (uint8_t *)malloc(secret->value_len);
+    if (plaintext == NULL)
+    {
+        c_secrecy_errno = ERR_P_TEXT_ALLOC_ERROR;
+        return NULL;
+    }
 
     expose_secret(secret, plaintext, secret->value_len);
 
@@ -135,6 +143,8 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
     uint8_t key[SECRET_KEY_SIZE];
     uint8_t iv[SECRET_IV_SIZE];
 
+    c_secrecy_errno = 0;
+
     // calculate the minimum length possible for the ciphertext
     ciphertext_len_min = MIN(size * 2, SECRET_KEY_SIZE * 2);
 
@@ -161,7 +171,7 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
      */
     if(1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
     {
-        // set errno / error string
+        c_secrecy_errno = ERR_ENC_INIT_ERROR;
         EVP_CIPHER_CTX_free(ctx);
         return NULL;
     }
@@ -173,14 +183,14 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
     ciphertext = (uint8_t *)malloc(sizeof(uint8_t)*ciphertext_len_min);
     if (ciphertext == NULL)
     {
-        // errno
+        c_secrecy_errno = ERR_C_TEXT_ALLOC;
         EVP_CIPHER_CTX_free(ctx);
         return NULL;
     }
 
     if(1 != EVP_EncryptUpdate(ctx, ciphertext, &len, data, size))
     {
-        // set errno / error string
+        c_secrecy_errno = ERR_ENC_UPDATE_ERROR;
         free(ciphertext);
         EVP_CIPHER_CTX_free(ctx);
         return NULL;
@@ -193,7 +203,7 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
      */
     if(1 != EVP_EncryptFinal_ex(ctx, ciphertext + len, &len))
     {
-        // set errno / error string
+        c_secrecy_errno = ERR_ENC_FINAL_ERROR;
         free(ciphertext);
         EVP_CIPHER_CTX_free(ctx);
         return NULL;
@@ -209,7 +219,7 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
     secret = (Secret_t *)malloc(sizeof(Secret_t));
     if (secret == NULL)
     {
-        // set errno
+        c_secrecy_errno = ERR_SEC_ALLOC_ERROR;
         free(ciphertext);
         return NULL;
     }
@@ -218,7 +228,7 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
     secret->value = (uint8_t *)malloc(sizeof(uint8_t) * ciphertext_len);
     if (secret->value == NULL)
     {
-        // set errno
+        c_secrecy_errno = ERR_SEC_VAL_ALLOC_ERROR;
         free(ciphertext);
         free(secret);
         return NULL;
@@ -246,12 +256,6 @@ Secret_t *create_secret(uint8_t *data, uint64_t size)
 */
 void __attribute__((optimize("O0"))) clear_secret(Secret_t *secret)
 {
-    // comments that this could be compiled out, memset_s solves this but was introduced in C11
-    if (secret == NULL)
-    {
-        return;
-    }
-
     if (secret->value != NULL)
     {
         memset(secret->value, 0, sizeof(uint8_t) * secret->ciphertext_len);
@@ -276,11 +280,20 @@ void __attribute__((optimize("O0"))) clear_secret(Secret_t *secret)
 */
 void delete_secret(Secret_t *secret)
 {
+    c_secrecy_errno = 0;
+    
+    if (secret == NULL)
+    {
+        c_secrecy_errno = ERR_SEC_DEL_NULL_ERROR;
+        return;
+    }
+
     clear_secret(secret);
 
-    // clear out the secret value
-    free(secret->value);
+    if (secret->value != NULL)
+    {
+        free(secret->value);
+    }
     
-    // delete the secret
     free(secret);
 }

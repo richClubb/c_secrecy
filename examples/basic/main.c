@@ -29,7 +29,7 @@ void main(int argc, char **argv)
     Secret_t *user_name;
     Secret_t *user_password;
 
-    // error handling
+    // error handling for input parameters
     if (argc != 3)
     {
         printf("Need to include [username] and [password] in command invocation.\n");
