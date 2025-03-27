@@ -21,8 +21,6 @@ add_executable(
     "main.c"
 )
 
-add_test(NAME "${PROJECT_NAME}" COMMAND "${PROJECT_NAME}")
-
 target_include_directories(
     "${PROJECT_NAME}" 
     PRIVATE 

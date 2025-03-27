@@ -62,13 +62,16 @@ void test_basic_int_inline(void)
     // can't check the memory location or we get a segfault. Gonna have to trust us bro.
 }
 
-void run_int_suite(void)
+void test_will_fail(void)
 {
-    
+    CU_ASSERT_EQUAL(1, 2);
+}
+
+void load_int_suite(void)
+{  
     CU_pSuite suite = CU_add_suite("C secrecy int tests", 0, 0);
     CU_add_test(suite, "test of basic int creation and destruction", test_basic_int);
     CU_add_test(suite, "test of basic int array creation and destruction", test_basic_int_array);
     CU_add_test(suite, "test of basic int creation and destruction 2", test_basic_int_inline);
-
-    CU_basic_run_tests();
+    CU_add_test(suite, "test that will fail", test_will_fail);
 }

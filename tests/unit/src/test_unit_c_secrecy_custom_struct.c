@@ -132,13 +132,10 @@ void test_basic_TLV_dynamic_sized(void)
     free(secret);
 }
 
-void run_custom_struct_suite(void)
+void load_custom_struct_suite(void)
 {
-    
     CU_pSuite suite = CU_add_suite("C secrecy custom struct tests", 0, 0);
     CU_add_test(suite, "test of basic custom struct creation and destruction", test_basic_custom_struct);
     CU_add_test(suite, "test of basic custom struct array creation and destruction", test_basic_custom_struct_array);
     CU_add_test(suite, "test of dynamic custom struct creation and destruction", test_basic_TLV_dynamic_sized);
-
-    CU_basic_run_tests();
 }

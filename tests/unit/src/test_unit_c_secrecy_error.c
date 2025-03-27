@@ -41,11 +41,8 @@ void test_delete_null_secret_value(void)
     delete_secret(&secret);
 }
 
-void run_error_suite(void)
-{
-    
+void load_error_suite(void)
+{   
     CU_pSuite suite = CU_add_suite("C secrecy error tests", 0, 0);
     CU_add_test(suite, "test of basic char creation and destruction", test_error_array_size);
-
-    CU_basic_run_tests();
 }

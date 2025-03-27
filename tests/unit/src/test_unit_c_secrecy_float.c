@@ -45,12 +45,9 @@ void test_basic_float_array(void)
     // can't check the memory location or we get a segfault. Gonna have to trust us bro.
 }
 
-void run_float_suite(void)
+void load_float_suite(void)
 {
-    
     CU_pSuite suite = CU_add_suite("C secrecy float tests", 0, 0);
     CU_add_test(suite, "test of basic float creation and destruction", test_basic_float);
     CU_add_test(suite, "test of basic float creation and destruction", test_basic_float_array);
-
-    CU_basic_run_tests();
 }

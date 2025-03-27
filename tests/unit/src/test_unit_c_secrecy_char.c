@@ -47,12 +47,9 @@ void test_basic_char_array(void)
     delete_secret(secret);
 }
 
-void run_char_suite(void)
+void load_char_suite(void)
 {
-    
     CU_pSuite suite = CU_add_suite("C secrecy char tests", 0, 0);
     CU_add_test(suite, "test of basic char creation and destruction", test_basic_char);
     CU_add_test(suite, "test of basic char array creation and destruction", test_basic_char_array);
-
-    CU_basic_run_tests();
 }
