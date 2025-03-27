@@ -24,6 +24,27 @@
                 "ignoreFailures": true
               }
             ] 
-        }
+        },
+        {
+          "name": "Debug Example Basic",
+          "preLaunchTask": "Build Debug",
+          "type": "cppdbg",
+          "request": "launch",
+          "program": "${workspaceRoot}/build/examples/basic/c_secrecy_basic_example",
+          "args": ["test", "a_thing"],
+          "stopAtEntry": false,
+          "cwd": "${workspaceRoot}/build/examples/basic/",
+          "environment": [],
+          "externalConsole": false, //set to true to see output in cmd instead
+          "MIMode": "gdb",
+          "miDebuggerPath": "/usr/bin/gdb",
+          "setupCommands": [
+            {
+              "description": "Enable pretty-printing for gdb",
+              "text": "-enable-pretty-printing",
+              "ignoreFailures": true
+            }
+          ] 
+      }
     ]
 }
