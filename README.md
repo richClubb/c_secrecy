@@ -1,3 +1,9 @@
+# NOTE
+
+This has been combined with the C++ version to make a single C compatible library (libsecrecy)(https://github.com/richClubb/libsecrecy)
+
+This branch is not going to be actively maintained
+
 # C Secrecy
 
 A library to replicate the functionality of the secrecy crate in Rust in C++
